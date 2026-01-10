@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<style>
+/* ===== HERO SECTION ===== */
+.hero {
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  color: #ffffff;
+  padding: 60px 40px;
+  border-radius: 18px;
+  margin-bottom: 50px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+.hero h1 {
+  font-size: 38px;
+  margin-bottom: 15px;
+}
+
+.hero p {
+  font-size: 18px;
+  opacity: 0.9;
+}
+
+.hero a {
+  display: inline-block;
+  margin-top: 25px;
+  padding: 14px 28px;
+  background: #ffffff;
+  color: #1e40af;
+  border-radius: 8px;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+/* ===== SECTION ===== */
+.section {
+  margin-bottom: 60px;
+}
+
+.section h2 {
+  margin-bottom: 25px;
+  font-size: 26px;
+  color: #0f172a;
+}
+
+/* ===== CATEGORIES ===== */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.category-card {
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 14px;
+  text-align: center;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+  text-decoration: none;
+  color: #0f172a;
+  font-weight: 500;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.category-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 30px rgba(0,0,0,0.15);
+}
+
+/* ===== FEATURED PRODUCTS ===== */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 25px;
+}
+
+.product-card {
+  background: #ffffff;
+  padding: 15px;
+  border-radius: 14px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  text-align: center;
+  transition: transform 0.25s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-6px);
+}
+
+.product-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.product-card h4 {
+  margin: 8px 0;
+}
+
+.price {
+  color: #2563eb;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.btn {
+  display: inline-block;
+  padding: 8px 16px;
+  background: #2563eb;
+  color: #ffffff;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .hero {
+    padding: 40px 25px;
+  }
+
+  .hero h1 {
+    font-size: 30px;
+  }
+}
+</style>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <h1>Quality Tech Accessories & Custom T-Shirts</h1>
+  <p>Affordable • Reliable • Designed for You</p>
+  <a href="{% url 'products:product_list' %}">Shop Now</a>
+</div>
+
+<!-- ===== CATEGORIES ===== -->
+<div class="section">
+  <h2>Shop by Category</h2>
+
+  <div class="category-grid">
+    {% for category in categories %}
+      <a href="{% url 'products:category_filter' category.slug %}" class="category-card">
+        {{ category.name }}
+      </a>
+    {% empty %}
+      <p>No categories available.</p>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- ===== FEATURED PRODUCTS ===== -->
+<div class="section">
+  <h2>Featured Products</h2>
+
+  <div class="product-grid">
+    {% for product in featured_products %}
+      <div class="product-card">
+
+        {% if product.images.first %}
+          <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}">
+        {% endif %}
+
+        <h4>{{ product.name }}</h4>
+        <p class="price">GHS {{ product.price }}</p>
+
+        <a href="{% url 'products:product_detail' product.slug %}" class="btn">
+          View Product
+        </a>
+      </div>
+    {% empty %}
+      <p>No featured products available.</p>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}

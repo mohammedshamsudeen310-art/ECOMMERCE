@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+{% block title %}Products{% endblock %}
+
+{% block content %}
+
+<style>
+/* ===== SHOP LAYOUT ===== */
+.shop-layout {
+  display: flex;
+  gap: 30px;
+  margin-top: 20px;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: 220px;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.sidebar h3 {
+  margin-bottom: 15px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar li {
+  margin-bottom: 10px;
+}
+
+.sidebar a {
+  display: block;
+  padding: 8px 10px;
+  color: #333;
+  text-decoration: none;
+  border-radius: 5px;
+}
+
+.sidebar a.active,
+.sidebar a:hover {
+  background: #2563eb;
+  color: #fff;
+}
+
+/* ===== PRODUCTS ===== */
+.products {
+  flex: 1;
+}
+
+.products h2 {
+  margin-bottom: 20px;
+}
+
+/* ===== PRODUCT GRID ===== */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+/* ===== PRODUCT CARD ===== */
+.product-card {
+  background: #ffffff;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+}
+
+/* ===== PRODUCT IMAGE ===== */
+.product-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover; /* keeps image visible without distortion */
+  border-radius: 8px;
+  margin-bottom: 10px;
+  background: #f1f1f1;
+}
+
+/* Placeholder if no image */
+.image-placeholder {
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e5e7eb;
+  border-radius: 8px;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+/* ===== PRODUCT INFO ===== */
+.product-card h4 {
+  margin: 8px 0;
+  font-size: 16px;
+}
+
+.price {
+  color: #2563eb;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+/* ===== BUTTON ===== */
+.btn {
+  display: inline-block;
+  padding: 8px 14px;
+  background: #2563eb;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.btn:hover {
+  background: #1e40af;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .shop-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+  }
+}
+
+/* ===== ADD TO CART BUTTON ===== */
+.btn-cart {
+  display: inline-block;
+  padding: 8px 14px;
+  background: #16a34a; /* green */
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 14px;
+  margin-right: 6px;
+}
+
+.btn-cart:hover {
+  background: #15803d;
+}
+
+/* Button group */
+.btn-group {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+</style>
+
+<div class="shop-layout">
+
+  <!-- CATEGORY SIDEBAR -->
+  <aside class="sidebar">
+    <h3>Categories</h3>
+    <ul>
+      <li>
+        <a href="{% url 'products:product_list' %}"
+           class="{% if not category %}active{% endif %}">
+          All Products
+        </a>
+      </li>
+
+      {% for cat in categories %}
+        <li>
+          <a href="{% url 'products:category_filter' cat.slug %}"
+             class="{% if category == cat %}active{% endif %}">
+            {{ cat.name }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  </aside>
+
+  <!-- PRODUCT GRID -->
+  <section class="products">
+    <h2>
+      {% if category %}
+        {{ category.name }}
+      {% else %}
+        All Products
+      {% endif %}
+    </h2>
+
+    <div class="product-grid">
+      {% for product in products %}
+        <div class="product-card">
+
+          {% if product.images.first %}
+            <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}">
+          {% else %}
+            <div class="image-placeholder">No Image</div>
+          {% endif %}
+
+          <h4>{{ product.name }}</h4>
+          <p class="price">GHS {{ product.price }}</p>
+
+            <div class="btn-group">
+
+            <a href="{% url 'cart:add_to_cart' product.id %}"
+                class="btn-cart">
+                Add to Cart
+            </a>
+
+            <a href="{% url 'products:product_detail' product.slug %}"
+                class="btn">
+                View
+            </a>
+
+            </div>
+
+
+        </div>
+      {% empty %}
+        <p>No products found.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+</div>
+
+{% endblock %}

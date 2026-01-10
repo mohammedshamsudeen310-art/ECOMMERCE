@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+/* ===== DASHBOARD WRAPPER ===== */
+.dashboard {
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  padding: 40px;
+  border-radius: 16px;
+  color: #ffffff;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+/* ===== GREETING ===== */
+.dashboard h2 {
+  font-size: 28px;
+  margin-bottom: 30px;
+  font-weight: 600;
+}
+
+/* ===== CARD GRID ===== */
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 25px;
+}
+
+/* ===== CARD ===== */
+.card {
+  background: rgba(255,255,255,0.08);
+  padding: 25px;
+  border-radius: 14px;
+  text-decoration: none;
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+  backdrop-filter: blur(10px);
+  transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+/* ===== CARD HOVER ===== */
+.card:hover {
+  transform: translateY(-6px);
+  background: rgba(255,255,255,0.18);
+  box-shadow: 0 20px 30px rgba(0,0,0,0.25);
+}
+
+/* ===== SPECIAL CARDS ===== */
+.card.logout {
+  background: rgba(239,68,68,0.25);
+}
+
+.card.logout:hover {
+  background: rgba(239,68,68,0.45);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 25px;
+  }
+
+  .dashboard h2 {
+    font-size: 24px;
+  }
+}
+</style>
+
+<div class="dashboard">
+  <h2>Hello, {{ request.user.username }} 👋</h2>
+
+  <div class="dashboard-cards">
+    <a href="{% url 'products:product_list' %}" class="card">
+      🛍 Continue Shopping
+    </a>
+
+    <a href="{% url 'orders:orders_list' %}" class="card">
+      📦 My Orders
+    </a>
+
+    <a href="{% url 'accounts:logout' %}" class="card logout">
+      🚪 Logout
+    </a>
+  </div>
+</div>
+
+{% endblock %}
