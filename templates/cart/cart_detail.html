@@ -90,10 +90,11 @@
           <td class="text-right">GH₵ {{ item.product.price }}</td>
           <td class="text-right">GH₵ {{ item.get_total_price }}</td>
           <td class="text-center">
-            <a href="{% url 'cart:remove_from_cart' item.product.id %}"
-               class="btn-remove">
-              Remove
-            </a>
+              {% if item.product %}
+                <a href="{% url 'cart:remove_from_cart' item.product.id %}">
+                  Remove
+                </a>
+              {% endif %}
           </td>
         </tr>
       {% endfor %}
