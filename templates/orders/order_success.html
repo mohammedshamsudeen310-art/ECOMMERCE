@@ -30,7 +30,7 @@
         <a href="{% url 'products:product_list' %}" class="btn">Continue Shopping</a>
 
         {% if order.status == 'pending' %}
-            <a href="{% url 'payments:paystack_payment' order.id %}" class="btn payment-btn">
+            <a href="{% url 'payments:paystack_page' order.id %}" class="btn payment-btn">
                 Proceed to Payment
             </a>
         {% endif %}

@@ -8,6 +8,8 @@ from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.urls import reverse
+from django.contrib import messages
 
 from orders.models import Order
 from .models import Payment
@@ -35,24 +37,38 @@ def choose_payment_method(request, order_id):
 
     return render(request, 'payments/choose_method.html', {'order': order})
 
-
-from django.shortcuts import get_object_or_404, redirect
-from django.conf import settings
-from .models import Payment
-from orders.models import Order
-import requests
+# Display Paystack payment page
+def paystack_page(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    return render(request, "payments/paystack_page.html", {"order": order})
 
 
+def generate_reference():
+    return f"PAY-{uuid.uuid4().hex[:12].upper()}"
+
+
+
+# Initiate Paystack payment
 def paystack_payment(request, order_id):
+    if request.method != "POST":
+        return redirect("orders:order_success", order_id=order_id)
+
     order = get_object_or_404(Order, id=order_id)
 
-    payment, created = Payment.objects.get_or_create(
+    payment = Payment.objects.filter(
         order=order,
-        defaults={
-            "amount": order.total_price,
-            "status": "pending",
-        }
-    )
+        payment_method="paystack",
+        status__in=["processing", "pending"]
+    ).first()
+
+    if not payment:
+        payment = Payment.objects.create(
+            order=order,
+            amount=order.total_price,
+            payment_method="paystack",
+            status="processing",
+            reference=generate_reference(),  # ✅ IMPORTANT
+        )
 
     headers = {
         "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
@@ -60,9 +76,12 @@ def paystack_payment(request, order_id):
     }
 
     data = {
-        "email": order.email,              # ✅ use Order email
+        "email": order.email,
         "amount": int(payment.amount * 100),
-        "callback_url": request.build_absolute_uri("/payments/verify/"),
+        "reference": payment.reference,  # ✅ Paystack reference
+        "callback_url": request.build_absolute_uri(
+            reverse("payments:paystack_verify")
+        ),
         "metadata": {
             "order_id": order.id,
             "payment_id": payment.id,
@@ -73,14 +92,53 @@ def paystack_payment(request, order_id):
         "https://api.paystack.co/transaction/initialize",
         json=data,
         headers=headers,
+        timeout=30,
     )
 
     result = response.json()
 
-    if result.get("status"):
+    if result.get("status") is True:
         return redirect(result["data"]["authorization_url"])
 
+    payment.status = "failed"
+    payment.save()
+
+    messages.error(request, "Payment initialization failed.")
     return redirect("orders:order_success", order_id=order.id)
+
+# Verify Paystack payment
+
+def paystack_verify(request):
+    reference = request.GET.get("reference")
+    payment = get_object_or_404(Payment, reference=reference)
+    if not reference:
+        return redirect("products:product_list")
+
+    headers = {
+        "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
+    }
+
+    response = requests.get(
+        f"https://api.paystack.co/transaction/verify/{reference}",
+        headers=headers,
+    )
+
+    result = response.json()
+
+    if result.get("status") and result["data"]["status"] == "success":
+        metadata = result["data"]["metadata"]
+        payment = Payment.objects.get(id=metadata["payment_id"])
+        payment.status = "completed"
+        payment.save()
+
+        order = payment.order
+        order.status = "paid"
+        order.save()
+
+        return redirect("orders:order_success", order_id=order.id)
+
+    return redirect("orders:order_success", order_id=metadata["order_id"])
+
 
 
 def payment_success(request, order_id):

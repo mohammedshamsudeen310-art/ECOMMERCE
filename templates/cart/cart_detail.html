@@ -91,7 +91,7 @@
           <td class="text-right">GH₵ {{ item.get_total_price }}</td>
           <td class="text-center">
               {% if item.product %}
-                <a href="{% url 'cart:remove_from_cart' item.product.id %}">
+                <a class="btn-remove" href="{% url 'cart:remove_from_cart' item.product.id %}">
                   Remove
                 </a>
               {% endif %}

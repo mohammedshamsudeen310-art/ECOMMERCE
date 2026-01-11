@@ -1,42 +1,119 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h2>Pay for Order #{{ order.id }}</h2>
-<p>Total: ${{ order.total_price }}</p>
+<style>
+.payment-container {
+    max-width: 480px;
+    margin: 60px auto;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    font-family: Arial, sans-serif;
+}
 
-<form method="POST">
-  {% csrf_token %}
+.payment-container h2 {
+    margin-bottom: 10px;
+    font-size: 24px;
+    color: #222;
+}
 
-  <label>
-    <input type="radio" name="payment_method" value="momo" required>
-    Mobile Money
-  </label><br>
+.payment-container .total {
+    font-size: 18px;
+    font-weight: bold;
+    color: #2c7be5;
+    margin-bottom: 25px;
+}
 
-  <label>
-    <input type="radio" name="payment_method" value="card">
-    Card (Visa / MasterCard)
-  </label><br>
+.payment-method {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px 15px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: border 0.2s ease, background 0.2s ease;
+}
 
-  <label>
-    <input type="radio" name="payment_method" value="bank">
-    Bank Transfer
-  </label><br><br>
+.payment-method:hover {
+    background: #f8f9fa;
+    border-color: #2c7be5;
+}
 
-  <div id="momo-fields" style="display:none;">
-    <input type="text" name="phone_number" placeholder="Mobile Money Number">
-  </div>
+.payment-method input {
+    margin-right: 12px;
+}
 
-  <button type="submit">Continue</button>
-</form>
+#momo-fields {
+    margin-top: 15px;
+}
+
+#momo-fields input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+button[type="submit"] {
+    width: 100%;
+    margin-top: 25px;
+    padding: 14px;
+    background: #2c7be5;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+button[type="submit"]:hover {
+    background: #1a68d1;
+}
+</style>
+
+<div class="payment-container">
+    <h2>Pay for Order #{{ order.id }}</h2>
+    <p class="total">Total: ${{ order.total_price }}</p>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <label class="payment-method">
+            <input type="radio" name="payment_method" value="momo" required>
+            Mobile Money
+        </label>
+
+        <label class="payment-method">
+            <input type="radio" name="payment_method" value="card">
+            Card (Visa / MasterCard)
+        </label>
+
+        <label class="payment-method">
+            <input type="radio" name="payment_method" value="bank">
+            Bank Transfer
+        </label>
+
+        <div id="momo-fields" style="display:none;">
+            <input type="text" name="phone_number" placeholder="Mobile Money Number">
+        </div>
+
+        <button type="submit">Continue Payment</button>
+    </form>
+</div>
 
 <script>
 const radios = document.querySelectorAll('input[name="payment_method"]');
 const momoFields = document.getElementById('momo-fields');
 
 radios.forEach(radio => {
-  radio.addEventListener('change', () => {
-    momoFields.style.display = radio.value === 'momo' ? 'block' : 'none';
-  });
+    radio.addEventListener('change', () => {
+        momoFields.style.display = radio.value === 'momo' ? 'block' : 'none';
+    });
 });
 </script>
 
